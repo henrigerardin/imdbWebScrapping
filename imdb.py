@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import urllib.request
 import csv
+import time
 
 urlpage="https://www.imdb.com/chart/top/?sort=ir,desc&mode=simple&page=1"
 
@@ -27,13 +28,15 @@ for result in results:
 
 	pageDetail= urllib.request.urlopen('https://www.imdb.com/'+url)
 	soupDetail = BeautifulSoup(pageDetail, 'html.parser')
+	originalTitle=''
+
 	try :
 		originalTitle=soupDetail.find('div', attrs={'class':'originalTitle'}).getText() 
 		originalTitle=originalTitle.replace(' (original title)','')
-		film.append(originalTitle)
 	except :
-		film.append(titre)
-
+		originalTitle=titre
+		
+	film.append(originalTitle)
 	date=result.find('td',attrs={'class':'titleColumn'}).find('span',attrs={'class':'secondaryInfo'}).getText()
 	date=date.replace('(','')
 	date=date.replace(')','')
@@ -43,28 +46,30 @@ for result in results:
 	note=note.replace('\n','')
 	film.append(note)
 
-	try: 
-		pageRT=urllib.request.urlopen('https://www.rottentomatoes.com/m/'+originalTitle.replace(' ','_'))
+	try:
+		urlRT='\nhttps://www.rottentomatoes.com/m/'+originalTitle.replace(' ','_').replace(':','').replace(',','').replace("'",'')
+		print(urlRT)
+		pageRT=urllib.request.urlopen(urlRT)
 		soupRT=BeautifulSoup(pageRT, 'html.parser')
-		try:
-			noteRT=soupRT.find_all('span',attrs={'class':'mop-ratings-wrap__percentage'})
-			noteRT1=noteRT[0].getText()
-			noteRT1=noteRT1.replace('\n','').replace(' ','').replace('%','')
-			noteRT2=noteRT[1].getText()
-			noteRT2=noteRT2.replace('\n','').replace(' ','').replace('%','')
-		except :
-			noteRT1=soupRT.find('span',attrs={'class':'mop-ratings-wrap__percentage'})
-			noteRT1=noteRT1.replace('\n','').replace(' ','').replace('%','')
-			noteRT2=soupRT.find
-		film.append(noteRT1)
-		film.append(noteRT2)
+		noteRT=soupRT.find_all('span',attrs={'class':'mop-ratings-wrap__percentage'})
+		noteRT1=noteRT[0].getText()
+		noteRT1=noteRT1.replace('\n','').replace(' ','').replace('%','')
+		noteRT2=noteRT[1].getText()
+		noteRT2=noteRT2.replace('\n','').replace(' ','').replace('%','')
 
-	except:
-		film.append(0)
-		film.append(0)
+	except Exception as e:
+		print(e)
+		print('\n')
+		noteRT1=0
+		noteRT2=0
+	
 
+	film.append(noteRT1)
+	film.append(noteRT2)
 	print(film)
 	rows.append(film)
+	time.sleep(1)
+
 
 # Create csv and write rows to output file
 with open('filmratings.csv','w', newline='') as f_output:
