@@ -46,18 +46,24 @@ for result in results:
 	try: 
 		pageRT=urllib.request.urlopen('https://www.rottentomatoes.com/m/'+originalTitle.replace(' ','_'))
 		soupRT=BeautifulSoup(pageRT, 'html.parser')
-		noteRT=soupRT.find_all('span',attrs={'class':'mop-ratings-wrap__percentage'})
-		noteRT1=noteRT[0].getText()
-		noteRT1=noteRT1.replace('\n','').replace(' ','').replace('%','')
+		try:
+			noteRT=soupRT.find_all('span',attrs={'class':'mop-ratings-wrap__percentage'})
+			noteRT1=noteRT[0].getText()
+			noteRT1=noteRT1.replace('\n','').replace(' ','').replace('%','')
+			noteRT2=noteRT[1].getText()
+			noteRT2=noteRT2.replace('\n','').replace(' ','').replace('%','')
+		except :
+			noteRT1=soupRT.find('span',attrs={'class':'mop-ratings-wrap__percentage'})
+			noteRT1=noteRT1.replace('\n','').replace(' ','').replace('%','')
+			noteRT2=soupRT.find
 		film.append(noteRT1)
-		noteRT2=noteRT[1].getText()
-		noteRT2=noteRT2.replace('\n','').replace(' ','').replace('%','')
 		film.append(noteRT2)
-		print(film)
+
 	except:
 		film.append(0)
 		film.append(0)
 
+	print(film)
 	rows.append(film)
 
 # Create csv and write rows to output file
